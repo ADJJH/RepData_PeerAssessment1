@@ -79,7 +79,20 @@ The `r max_interval` interval has the max average of steps.
 
 
 ## Imputing missing values
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
+```{r}
+sum(is.na(df$steps))
+```
+
+Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc
+
+```{r}
+merge_df<-merge(df,interval_steps,by.x="interval",by.y="Interval")
+na_index <- which(is.na(merge_df$steps))
+merge_df$steps[na_index]<-merge_df$Mean_steps[na_index]
+
+```
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
