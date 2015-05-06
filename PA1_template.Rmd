@@ -94,5 +94,48 @@ merge_df$steps[na_index]<-merge_df$Mean_steps[na_index]
 
 ```
 
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+```{r}
+df_clean<-merge_df[,c("steps","date","interval")]
+```
+
+Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
+
+```{r}
+steps_per_day_clean <- ddply(df_clean[,-3], c("date"), summarise,
+                       sum = sum(steps, na.rm=TRUE)
+                       )
+
+hist(steps_per_day_clean$sum,breaks=30,
+     main="Steps per day clean",xlab="Number of steps per day",ylab="Frequency")
+
+mean_per_day_clean<-mean(steps_per_day_clean$sum)
+median_per_day_clean<-median(steps_per_day_clean$sum)
+
+comparisons<-data.frame(dfname=c("df","df_clean"),mean=c(mean_per_day,mean_per_day_clean),median=c(median_per_day,median_per_day_clean))
+comparisons
+
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
+Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
+
+```{r}
+df_clean$date <- as.Date(df_clean$date)
+weekdays_factor <- c('ma', 'di', 'Wo', 'do', 'vr')
+df_clean$wday<-factor((weekdays(df_clean$date,abbreviate=TRUE) %in% weekdays_factor)+1L,
+      levels=1:2, labels=c('weekend', 'weekday'))
+
+```
+
+
+Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.
+
+```{r}
+steps_int_wk <- ddply(df_clean[,-2], c("interval","wday"), summarise,
+                       mean = mean(steps, na.rm=TRUE)
+                       )
+library(lattice)
+xyplot(mean~interval|wday,data=steps_int_wk,layout=c(1,2),type = 'l') 
+```
